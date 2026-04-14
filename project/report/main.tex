@@ -47,9 +47,9 @@ Duke University\\
 \maketitle
 
 \begin{abstract}
-We conduct a controlled, three-family comparison of speculative decoding on a T4 GPU---bandwidth-bound hardware where system-level effects dominate theoretical predictions.
-Sequoia's hardware-aware tree optimizer predicts $1.68\times$ speedup for the DP-optimal $(n{=}16, d{=}3)$ tree; we measure $0.56\times$.
-We decompose this $3\times$ gap into \emph{four} independently-measurable terms---accepted-token overprediction, verify-cost underestimate, draft bandwidth floor, and a fourth term revealed by attempting the standard cross-iteration KV-persistence optimization, which on T4 produces a further measured slowdown from $0.56\times$ to $0.46\times$ because each cache-extension step costs a full bandwidth-floored forward pass ($\sim$67\,ms combined) where Sequoia's model implicitly assumes near-zero overhead.
+I conduct a controlled, three-family comparison of speculative decoding on a T4 GPU---bandwidth-bound hardware where system-level effects dominate theoretical predictions.
+Sequoia's hardware-aware tree optimizer predicts $1.68\times$ speedup for the DP-optimal $(n{=}16, d{=}3)$ tree; I measure $0.56\times$.
+I decompose this $3\times$ gap into \emph{four} independently-measurable terms---accepted-token overprediction, verify-cost underestimate, draft bandwidth floor, and a fourth term revealed by attempting the standard cross-iteration KV-persistence optimization, which on T4 produces a further measured slowdown from $0.56\times$ to $0.46\times$ because each cache-extension step costs a full bandwidth-floored forward pass ($\sim$67\,ms combined) where Sequoia's model implicitly assumes near-zero overhead.
 A calibrated four-term formula reconciles to within $1.1\%$ of measurement.
 Linear SD exhibits a closed-form break-even crossover between $k{=}3$ and $k{=}5$ that pinpoints when it starts to slow generation down.
 Prompt lookup decoding is the only method achieving speedup ($1.39\times$) on T4, because its zero draft cost bypasses the bandwidth bottleneck entirely.
@@ -69,8 +69,8 @@ Consumer and cloud GPUs (T4, L4, A10) operate in a bandwidth-bound regime where 
 
 \paragraph{Research hypothesis.}
 Published speculative decoding cost models (Eqs.~\ref{eq:linear}--\ref{eq:tree}) accurately predict end-to-end speedup on the hardware they were calibrated for, but contain hidden assumptions that fail on bandwidth-bound hardware.
-We test this by porting Sequoia's hardware-aware optimizer~\cite{chen2024sequoia} to a T4 GPU, predicting a $1.68\times$ speedup, and measuring the gap.
-We further hypothesize that the gap is not random implementation noise but decomposes into a small number of independently-measurable terms, each traceable to a specific assumption.
+I test this by porting Sequoia's hardware-aware optimizer~\cite{chen2024sequoia} to a T4 GPU, predicting a $1.68\times$ speedup, and measuring the gap.
+I further hypothesize that the gap is not random implementation noise but decomposes into a small number of independently-measurable terms, each traceable to a specific assumption.
 \S\ref{sec:tree}--\S\ref{sec:fourth} confirm both hypotheses.
 
 \paragraph{Contributions.}
@@ -84,10 +84,10 @@ We further hypothesize that the gap is not random implementation noise but decom
 \label{sec:cost}
 
 Prior work typically parameterizes speculative decoding speedup in terms of the draft-to-target parameter ratio, implicitly assuming that inference cost scales with model size.
-We argue this assumption fails on bandwidth-bound hardware and propose instead to ground the cost model in \emph{measured wall-clock per-token decode time}.
+I argue this assumption fails on bandwidth-bound hardware and propose instead to ground the cost model in \emph{measured wall-clock per-token decode time}.
 
-We define $C_t$ and $C_d$ as the measured wall-clock times for a single-token forward pass of the target and draft models, respectively.
-On bandwidth-bound hardware this diverges sharply from parameter-count proxies: our 1B draft and 3B target (Llama-3.2 family, fp16, T4 GPU) yield $C_d = 22.42$\,ms and $C_t = 37.63$\,ms, giving a cost ratio $c = C_d/C_t = 0.596$---nearly double the parameter ratio of $0.333$.
+I define $C_t$ and $C_d$ as the measured wall-clock times for a single-token forward pass of the target and draft models, respectively.
+On bandwidth-bound hardware this diverges sharply from parameter-count proxies: my 1B draft and 3B target setup (Llama-3.2 family, fp16, T4 GPU) yields $C_d = 22.42$\,ms and $C_t = 37.63$\,ms, giving a cost ratio $c = C_d/C_t = 0.596$---nearly double the parameter ratio of $0.333$.
 Section~\ref{sec:probe} traces this compression to a weight-loading bandwidth floor: per-call cost is dominated by streaming model parameters from HBM, and this floor is paid regardless of how few tokens or FLOPs the call involves.
 On compute-bound hardware (A100, H100), per-call cost scales more closely with FLOPs, so the gap between draft and target is larger.
 This distinction---bandwidth-bound vs.\ compute-bound---determines whether speculative decoding can provide a practical benefit.
@@ -127,11 +127,11 @@ Its speedup reduces to $S_{\text{ret}} \approx E[\tau_r]$---bounded only by the 
 \section{Related Work and Positioning}
 \label{sec:related}
 
-Speculative decoding was independently introduced by Leviathan et al.~\cite{leviathan2023speculative} and Chen et al.~\cite{chen2023accelerating}; subsequent work extended this into three families we study here---linear draft-verify~\cite{leviathan2023speculative,chen2023accelerating,hf_assisted}, tree-structured speculation (SpecInfer~\cite{miao2024specinfer}, Sequoia~\cite{chen2024sequoia}, and single-model variants Medusa~\cite{cai2024medusa}, Hydra~\cite{ankner2024hydra}, EAGLE~\cite{li2024eagle}), and retrieval-based methods (PLD~\cite{saxena2023pld}, REST~\cite{he2024rest}, SAM-Decoding~\cite{hu2024samdecoding}).
-We exclude single-model variants from evaluation because they require fine-tuning outside our scope.
+Speculative decoding was independently introduced by Leviathan et al.~\cite{leviathan2023speculative} and Chen et al.~\cite{chen2023accelerating}; subsequent work extended this into three families I study here---linear draft-verify~\cite{leviathan2023speculative,chen2023accelerating,hf_assisted}, tree-structured speculation (SpecInfer~\cite{miao2024specinfer}, Sequoia~\cite{chen2024sequoia}, and single-model variants Medusa~\cite{cai2024medusa}, Hydra~\cite{ankner2024hydra}, EAGLE~\cite{li2024eagle}), and retrieval-based methods (PLD~\cite{saxena2023pld}, REST~\cite{he2024rest}, SAM-Decoding~\cite{hu2024samdecoding}).
+I exclude single-model variants from evaluation because they require fine-tuning outside my scope.
 Spec-Bench~\cite{xia2024specbench} is the closest empirical survey but runs only on A100 with Vicuna pairs; it reports cross-method comparisons without gap decomposition and does not include bandwidth-bound hardware.
-Our cost model draws on the roofline framework of Williams et al.~\cite{williams2009roofline} but differs in emphasis: LLM decoding at batch 1 is below the roofline knee for all current GPUs, so the relevant axis is not arithmetic intensity but the \emph{absolute} bandwidth tax, which varies $\sim$40$\times$ between T4 ($\sim$20\,ms per 1B fp16 forward) and A100 ($\sim$0.5\,ms).
-To our knowledge this is the first controlled cross-family study on bandwidth-bound hardware that quantitatively decomposes the gap against a published cost model and reconciles it to Python-orchestration noise.
+My cost model draws on the roofline framework of Williams et al.~\cite{williams2009roofline} but differs in emphasis: LLM decoding at batch 1 is below the roofline knee for all current GPUs, so the relevant axis is not arithmetic intensity but the \emph{absolute} bandwidth tax, which varies $\sim$40$\times$ between T4 ($\sim$20\,ms per 1B fp16 forward) and A100 ($\sim$0.5\,ms).
+To my knowledge this is the first controlled cross-family study on bandwidth-bound hardware that quantitatively decomposes the gap against a published cost model and reconciles it to Python-orchestration noise.
 
 
 \section{Measurement Infrastructure}
@@ -141,14 +141,14 @@ All experiments run on a single T4 GPU (16\,GB, $\sim$300\,GB/s bandwidth) via G
 Models: Llama-3.2-3B (fp16, target) and Llama-3.2-1B (fp16, draft).
 Prompt suite: 10 prompts across five domains (general knowledge, code, summarization, instruction, long-context), 128 generated tokens, 30 trials per configuration with 3 warmup iterations and explicit \texttt{torch.cuda.synchronize()} barriers.
 
-Beyond the standard HuggingFace \texttt{generate()} API, we implemented eight measurement subsystems that collectively required $\sim$2{,}000 lines of custom code.
+Beyond the standard HuggingFace \texttt{generate()} API, I implemented eight measurement subsystems that collectively required $\sim$2{,}000 lines of custom code.
 This section enumerates them to establish implementation depth.
 
 \begin{enumerate}
 \itemsep=2pt
 \item \textbf{$\alpha$-instrumented SD loop.}
 A custom speculative decoding loop that records per-iteration acceptance counts, enabling direct measurement of chain acceptance rate $\alpha(k)$ at each speculation length.
-Unlike HuggingFace's \texttt{num\_assistant\_tokens} interface, which reports only aggregate throughput, our loop instruments the accept/reject decision at each position, providing the data for break-even analysis (\S\ref{sec:linear}).
+Unlike HuggingFace's \texttt{num\_assistant\_tokens} interface, which reports only aggregate throughput, my loop instruments the accept/reject decision at each position, providing the data for break-even analysis (\S\ref{sec:linear}).
 
 \item \textbf{Standalone $C_d$/$C_t$ measurement.}
 Isolated autoregressive generation runs measuring per-token wall-clock cost for each model independently, with CUDA synchronization barriers.
@@ -160,7 +160,7 @@ At each decoding step, the draft model's top-$k$ candidates are compared against
 The resulting vector $\mathbf{p} = [0.846, 0.574, 0.55, 0.333, 0.167]$ is the required input to the DP tree optimizer.
 
 \item \textbf{Sequoia DP optimizer port.}
-Reimplementation of Algorithm~1 in Appendix~F.1.1 of~\cite{chen2024sequoia} with our measured acceptance vector, exploring tree structures up to size 64 and depth 6.
+Reimplementation of Algorithm~1 in Appendix~F.1.1 of~\cite{chen2024sequoia} with my measured acceptance vector, exploring tree structures up to size 64 and depth 6.
 
 \item \textbf{Minimal Sequoia-compliant tree runtime (v2).}
 The core algorithmic contribution: a tree-structured speculative decoding engine implementing (a)~tree attention mask construction satisfying the cover property, (b)~target-model argmax acceptance, (c)~within-iteration draft KV cache persistence with branch-level fork/consume-in-place semantics, and (d)~position ID management assigning \texttt{prefix\_len}${} - 1 + d$ to each tree node at depth $d$.
@@ -333,7 +333,7 @@ The advantage is not marginal---it represents the difference between the only me
 \label{sec:probe}
 
 A common assumption in speculative decoding cost models is that cache persistence reduces per-call decode cost by skipping recomputation of cached key--value states.
-We test this directly with a controlled probe: single-token incremental decoding with a persistent KV cache at $L \in \{30, 64, 128, 256\}$ (Table~\ref{tab:probe}).
+I test this directly with a controlled probe: single-token incremental decoding with a persistent KV cache at $L \in \{30, 64, 128, 256\}$ (Table~\ref{tab:probe}).
 
 \begin{table}[t]
 \centering
@@ -358,7 +358,7 @@ $L$ & $C_d$ (ms) & $C_t$ (ms) & Fork (ms) \\
 $C_d$ is flat at $20.0 \pm 0.2$\,ms across an $8.5\times$ range in cache length (2.3\% spread).
 $C_t$ is similarly flat at $35.4 \pm 0.5$\,ms (excluding the $L{=}30$ warmup outlier).
 This confirms the \emph{bandwidth-floor} mechanism: each forward pass is dominated by streaming model weights from HBM.
-For our 1B fp16 draft, the weight-loading floor alone is $2\,\text{GB} / 300\,\text{GB/s} \approx 6.7$\,ms; the residual $\sim$13\,ms comprises KV-attention reads (which scale with $L$ but contribute a few hundred microseconds at these lengths), kernel launch overhead, and small elementwise ops.
+For the 1B fp16 draft, the weight-loading floor alone is $2\,\text{GB} / 300\,\text{GB/s} \approx 6.7$\,ms; the residual $\sim$13\,ms comprises KV-attention reads (which scale with $L$ but contribute a few hundred microseconds at these lengths), kernel launch overhead, and small elementwise ops.
 The key empirical fact is not the precise breakdown but the \emph{flatness}: per-call cost is essentially constant across an $8.5\times$ range in $L$.
 
 Cache fork cost (deep-copy for branch-level tree speculation) is 2--5\,ms, negligible relative to the $\sim$20\,ms forward pass.
@@ -367,14 +367,14 @@ This finding is the unifying mechanism behind every result in this paper.
 First, it explains the compressed cost ratio of \S\ref{sec:linear}: $c = 0.596$ (vs.\ parameter ratio $0.333$) is determined by bandwidth, not compute, and no amount of cache optimization will reduce it.
 Second, it underlies the quantization trap of \S\ref{sec:quant}: 4-bit quantization shrinks the target's bandwidth tax but not the draft's, increasing the effective $c$.
 Third, it explains PLD's structural advantage in \S\ref{sec:pld}: replacing GPU draft calls with CPU n-gram matching is the only way to bypass the floor.
-Fourth, as we show next (\S\ref{sec:tree}), it directly causes Sequoia's cost model to overestimate speedup by $3\times$---and an attempted optimization to recover that gap (\S\ref{sec:fourth}) makes things \emph{worse} for the same reason.
+Fourth, as I show next (\S\ref{sec:tree}), it directly causes Sequoia's cost model to overestimate speedup by $3\times$---and an attempted optimization to recover that gap (\S\ref{sec:fourth}) makes things \emph{worse} for the same reason.
 
 
 \section{What Sequoia's Cost Model Misses on T4}
 \label{sec:tree}
 
 Sequoia~\cite{chen2024sequoia} provides a hardware-aware cost model that selects an optimal tree topology $(n, d)$ for a given acceptance vector and cost ratio.
-We feed our measured T4 parameters into this model and test its predictions against our implementation.
+I feed my measured T4 parameters into this model and test its predictions against my implementation.
 
 \paragraph{Setup.}
 The measured positional acceptance vector $\mathbf{p} = [0.846, 0.574, 0.55, 0.333, 0.167]$ (305 samples) is the input to Sequoia's DP optimizer.
@@ -382,7 +382,7 @@ With cost ratio $c = 0.596$ and verify-cost function $t(n)$ from Sequoia's T4 es
 The secondary configuration $(n{=}8, d{=}3)$ predicts $G = 3.72$, $S = 1.312\times$.
 
 \paragraph{Implementation (v2).}
-Our minimal Sequoia-compliant runtime implements the DP tree optimizer, tree attention with the cover-property mask, and within-iteration draft KV cache persistence with branch-level fork/consume-in-place semantics.
+My minimal Sequoia-compliant runtime implements the DP tree optimizer, tree attention with the cover-property mask, and within-iteration draft KV cache persistence with branch-level fork/consume-in-place semantics.
 No CUDA graphs, no custom kernels, no batch parallelism---pure algorithmic faithfulness to the paper's specification.
 
 \paragraph{Results.}
@@ -434,21 +434,21 @@ Iter total (ms)       & 110.6 & 197.0 & $+78\%$ & 106.8 & 139.7 & $+31\%$ \\
 
 \paragraph{(a) Accepted-token overprediction ($G$: $-40\%$/$-23\%$).}
 Sequoia's DP predicts $G$ assuming positional acceptance independence (Definition~3.1 in~\cite{chen2024sequoia}).
-We measure significantly fewer accepted tokens per iteration.
-We attribute this primarily to small-sample noise at deeper acceptance positions ($p_4$ and $p_5$ have only 9 and 6 samples respectively in our 305-sample measurement); positional dependence on context likely contributes but we did not measure it directly.
+I measure significantly fewer accepted tokens per iteration.
+I attribute this primarily to small-sample noise at deeper acceptance positions ($p_4$ and $p_5$ have only 9 and 6 samples respectively in my 305-sample measurement); positional dependence on context likely contributes but I did not measure it directly.
 The $(8,3)$ configuration shows a smaller error ($-23\%$) because its smaller tree is less sensitive to deep-position noise.
 
 \paragraph{(b) Verify-cost underestimate ($+59\%$/$+63\%$).}
 Sequoia assumes $t(n{=}16) = 1.15$, i.e., verifying 16 tree nodes costs only 15\% more than a single-token decode.
-We measure $1.83 \cdot C_t$.
+I measure $1.83 \cdot C_t$.
 On bandwidth-bound hardware, tree attention with a branching mask cannot exploit the compute parallelism that makes batched verification nearly free on A100: memory bandwidth, not compute, is the bottleneck, so processing more tokens provides minimal amortization.
 The error is consistent across both configurations ($+59\%$ vs.\ $+63\%$), confirming this is a general scaling failure of the $t(n)$ approximation in this regime.
 
 \paragraph{(c) Draft bandwidth floor ($+90\%$/$+68\%$).}
 Sequoia predicts $d \cdot c \cdot C_t = 67.3$\,ms, assuming $d{=}3$ sequential draft calls at $c \cdot C_t$ each.
-We measure $128.1$\,ms for $(16,3)$, comprising a full prefix rebuild ($32.9$\,ms) plus four single-token extends ($4 \times 23.8 = 95.2$\,ms).
+I measure $128.1$\,ms for $(16,3)$, comprising a full prefix rebuild ($32.9$\,ms) plus four single-token extends ($4 \times 23.8 = 95.2$\,ms).
 The probe (\S\ref{sec:probe}) confirms each extend hits the $\sim$20\,ms bandwidth floor regardless of cache length.
-A natural question follows: if prefix-rebuild adds $\sim$33\,ms per iteration, can we eliminate it by persisting the draft cache across iterations? This is the question \S\ref{sec:fourth} answers.
+A natural question follows: if prefix-rebuild adds $\sim$33\,ms per iteration, can I eliminate it by persisting the draft cache across iterations? This is the question \S\ref{sec:fourth} answers.
 
 \paragraph{Calibrated formula.}
 Plugging measured per-iteration components into Eq.~\ref{eq:tree} reconciles to within $1.1\%$ of measurement for $(16,3)$ and $0.6\%$ for $(8,3)$.
@@ -460,7 +460,7 @@ The algorithm is sound; the cost model's three assumptions---not the speculation
 
 The natural optimization implied by \S\ref{sec:tree}'s draft cost analysis is to persist both draft and target KV caches across iterations, eliminating the per-iteration prefix rebuild.
 On compute-bound hardware (A100), this is unambiguously a win: extending a cache by $\sim$3 tokens requires negligible compute relative to the eliminated $\sim$33\,ms rebuild.
-We implemented this optimization (v3, infrastructure item~7) and benchmarked it.
+I implemented this optimization (v3, infrastructure item~7) and benchmarked it.
 On T4 it produces a measured \emph{slowdown} from $0.557\times$ to $0.456\times$ for $(n{=}16, d{=}3)$.
 This finding constitutes a \emph{fourth} hidden assumption in Sequoia's cost model: that the cache-maintenance step required between iterations costs negligible time.
 
@@ -492,7 +492,7 @@ speedup vs.\ baseline  & 0.557$\times$ & 0.456$\times$ & $-0.101$ \\
 The cache-extension step appends the accepted chain ($\sim$3 tokens) plus bonus to both caches by running one short forward through each model.
 A naive cost model says this is essentially free---extending a 100-token cache by 3 tokens involves $\sim$3\% more compute.
 On T4, both forwards hit the bandwidth floor.
-Each extension costs essentially $C_d + C_t \approx 20 + 35 = 55$\,ms regardless of how few tokens we add; we measure $67.2$\,ms (the residual is Python orchestration of two sequential forwards).
+Each extension costs essentially $C_d + C_t \approx 20 + 35 = 55$\,ms regardless of how few tokens I add; I measure $67.2$\,ms (the residual is Python orchestration of two sequential forwards).
 This $67.2$\,ms exceeds the $32.9$\,ms prefix rebuild it was designed to eliminate, more than canceling the verify savings.
 
 The $(n{=}8, d{=}3)$ configuration shows the same pattern: v2 $0.771\times$, v3 $0.564\times$.
@@ -514,7 +514,7 @@ The optimization's sign \emph{flips} based purely on whether bandwidth or comput
 A cost model that does not include this term will recommend the wrong implementation strategy on the wrong hardware.
 
 \paragraph{Why this matters for cost-model design.}
-Sequoia's published model has three explicit terms (verify, draft, $C_{\text{sys}}$); we measure $C_{\text{sys}} \approx 0.1$\,ms/iter (\S\ref{sec:profiler}), confirming it correctly captures bookkeeping (truncate, fork).
+Sequoia's published model has three explicit terms (verify, draft, $C_{\text{sys}}$); I measure $C_{\text{sys}} \approx 0.1$\,ms/iter (\S\ref{sec:profiler}), confirming it correctly captures bookkeeping (truncate, fork).
 What it does not include is \emph{cache extension}: advancing both models' KV state by the accepted chain.
 On A100 this is correctly absorbed into ``negligible''; on T4 it becomes the largest single per-iteration component (Table~\ref{tab:v2v3}: $67.2$\,ms vs.\ verify $51.2$\,ms).
 Production frameworks~\cite{vllm_docs,trtllm_docs} mitigate this with CUDA graphs that fuse multiple model calls---an implementation optimization the algorithmic cost model does not capture.
@@ -557,7 +557,7 @@ The v3 result is \emph{not} an implementation defect---it is a faithful realizat
 \section{Profiler-Based Bottleneck Attribution}
 \label{sec:profiler}
 
-We use PyTorch's CUDA profiler to validate two predictions of the bandwidth-floor model: that $C_{\text{sys}}$ is negligible (KV bookkeeping is not a bottleneck), and that an earlier observational claim about ``framework amortization'' was a measurement artifact.
+I use PyTorch's CUDA profiler to validate two predictions of the bandwidth-floor model: that $C_{\text{sys}}$ is negligible (KV bookkeeping is not a bottleneck), and that an earlier observational claim about ``framework amortization'' was a measurement artifact.
 
 \begin{table}[t]
 \centering
@@ -682,18 +682,18 @@ Tree-SD amplifies the cost-ratio problem: larger trees require more draft calls 
 Sequoia's cost model is not wrong---it is calibrated for different hardware.
 On A100 with a JF68M-scale draft (where Sequoia's Table~1~\cite{chen2024sequoia} reports $C_d = 0.5$\,ms and $C_t = 24.2$\,ms, giving $c \approx 0.02$), the verify cost is approximately constant in tree size, $G$ is well-predicted by positional independence (the 7B target's distribution is closer to the draft's after Sequoia's distillation), and cache extension is negligible relative to compute.
 On T4 with a 1B draft, all four assumptions break.
-Our calibrated four-term formula reconciles to within Python-orchestration noise, confirming that the algorithm is sound and only the cost parameters need recalibration.
+My calibrated four-term formula reconciles to within Python-orchestration noise, confirming that the algorithm is sound and only the cost parameters need recalibration.
 Tree methods need either (a)~much smaller specialized drafts (JF68M-scale, $c \lesssim 0.05$), (b)~compute-bound hardware where every per-iteration term except $G$ becomes near-zero, or (c)~heavy systems optimizations (CUDA graphs, custom kernels) that the algorithmic cost model does not capture.
 
 \paragraph{Limitations.}
-Several factors limit the scope of our claims.
-(1)~Our tree implementation does not include CUDA graphs or custom kernels, which production frameworks~\cite{vllm_docs,trtllm_docs} use to mitigate per-call fixed overhead; the gap to a graph-fused implementation is bounded above by our $T_f \approx 13$\,ms per call.
+Several factors limit the scope of my claims.
+(1)~My tree implementation does not include CUDA graphs or custom kernels, which production frameworks~\cite{vllm_docs,trtllm_docs} use to mitigate per-call fixed overhead; the gap to a graph-fused implementation is bounded above by my $T_f \approx 13$\,ms per call.
 (2)~The acceptance vector was measured on 305 samples; deeper positions ($p_4$: 9 samples, $p_5$: 6 samples) have wide confidence intervals.
 A 1000-sample re-measurement would tighten the $G$-prediction error in Table~\ref{tab:gap} but is unlikely to change the qualitative finding that $G$ is overpredicted.
 (3)~All experiments use a single T4 GPU with batch size 1.
-At larger batch sizes, arithmetic intensity rises and the bandwidth-bound regime weakens; our findings predict that batch-$B$ throughput-optimized serving on T4 would show progressively smaller cost-model gaps as $B$ grows.
-(4)~We did not directly cross-validate the v3 ``qualitative inversion'' on A100 hardware; the prediction follows from the bandwidth-floor model rather than from measurement.
-(5)~Our 10-prompt suite emphasizes generation quality over coverage; a larger benchmark (e.g., MT-Bench, HumanEval) would tighten the per-prompt variance estimates.
+At larger batch sizes, arithmetic intensity rises and the bandwidth-bound regime weakens; my findings predict that batch-$B$ throughput-optimized serving on T4 would show progressively smaller cost-model gaps as $B$ grows.
+(4)~I did not directly cross-validate the v3 ``qualitative inversion'' on A100 hardware; the prediction follows from the bandwidth-floor model rather than from measurement.
+(5)~My 10-prompt suite emphasizes generation quality over coverage; a larger benchmark (e.g., MT-Bench, HumanEval) would tighten the per-prompt variance estimates.
 
 \paragraph{Reproducibility.}
 All measurements use Llama-3.2-3B (target) and Llama-3.2-1B (draft) in fp16 on a single T4 GPU through Google Colab, with PyTorch 2.10 and Transformers 4.45.
@@ -702,10 +702,10 @@ The 10-prompt suite (Section~\ref{sec:infra}) is fixed across all experiments.
 Random seeds are fixed at 42 for both PyTorch and NumPy; greedy decoding eliminates sampling noise.
 The DP optimizer port (Section~\ref{sec:infra} item~4) and tree runtime (item~5, item~7) are implemented in pure Python with no CUDA/Triton kernels, totaling $\sim$2{,}000 lines.
 Both v2 and v3 runtimes pass an identical correctness gate: 20/20 token-identical output against greedy autoregressive baseline.
-Run-to-run variation in throughput is $\le 5\%$ across our 30-trial samples; the qualitative findings (linear SD slowdown at $k\geq 5$, tree slowdown for both v2 and v3, PLD speedup) are robust to seed and prompt-suite variation in our preliminary cross-validation.
+Run-to-run variation in throughput is $\le 5\%$ across my 30-trial samples; the qualitative findings (linear SD slowdown at $k\geq 5$, tree slowdown for both v2 and v3, PLD speedup) are robust to seed and prompt-suite variation in my preliminary cross-validation.
 
 \paragraph{Generalizable rule.}
-We can derive a closed-form prediction for when the four assumptions break.
+I can derive a closed-form prediction for when the four assumptions break.
 Decompose per-call cost as $C = T_w + T_f$, where $T_w = (\text{params} \cdot 2 \text{ bytes})/B_{\text{HW}}$ is weight-loading time and $T_f$ is per-call fixed overhead (kernel launch, layernorm, RoPE, residuals).
 The cost ratio becomes:
 \[
@@ -713,16 +713,29 @@ c = \frac{C_d}{C_t} = \frac{T_w^d + T_f}{T_w^t + T_f}.
 \]
 When $T_f \ll T_w$, $c$ approaches the parameter ratio $r = \text{params}_d/\text{params}_t$.
 When $T_f$ is comparable to $T_w$, $c$ is compressed toward 1.
-For our T4 + 1B/3B setup: $T_w^d \approx 6.7$\,ms, $T_w^t \approx 20$\,ms, $T_f \approx 13$\,ms (residual from probe), so $c \approx (6.7+13)/(20+13) = 0.60$, matching our measured $c=0.596$.
+For my T4 + 1B/3B setup: $T_w^d \approx 6.7$\,ms, $T_w^t \approx 20$\,ms, $T_f \approx 13$\,ms (residual from probe), so $c \approx (6.7+13)/(20+13) = 0.60$, matching my measured $c=0.596$.
 For Sequoia's A100 + JF68M/7B setup: $T_w^d \approx 0.087$\,ms, $T_w^t \approx 9$\,ms, $T_f \approx 0.4$\,ms~\cite{chen2024sequoia}, predicting $c \approx 0.5/9.4 = 0.053$ (Sequoia measures $0.5/24.2 = 0.021$; the 2$\times$ discrepancy reflects HuggingFace pipeline overhead absorbed into $T_f^t$).
 The rule: speculative decoding is viable on hardware where $T_w^t \gg T_f$, i.e., when the target model is large enough that bandwidth, not fixed costs, dominates per-call time.
 This predicts T4, L4, and consumer GPUs (RTX 4060/4070-class) will all exhibit qualitatively similar four-assumption-failure patterns, while H100 and A100 (with a sufficiently small draft) will not.
 
 \paragraph{Answer to the research hypothesis.}
 Both hypotheses are confirmed.
-Sequoia's predicted $1.68\times$ vs.\ our measured $0.56\times$ on T4 establishes the cost-model gap; the four-term calibrated formula reconciles to within $1.1\%$ of measurement, establishing that the gap is not noise but a structured decomposition.
+Sequoia's predicted $1.68\times$ vs.\ my measured $0.56\times$ on T4 establishes the cost-model gap; the four-term calibrated formula reconciles to within $1.1\%$ of measurement, establishing that the gap is not noise but a structured decomposition.
 The practical consequence is asymmetric: tree-structured methods that win on H100 with specialized drafts will lose on bandwidth-bound hardware regardless of tree topology, while PLD (which has zero $C_d$) wins on both regimes.
 Practitioners deploying speculative decoding on bandwidth-bound hardware should choose PLD if the workload has prompt-output overlap; otherwise, use linear SD only at $k = 3$ with a domain-validated $\alpha > 0.70$, and avoid tree methods unless the deployment can absorb the engineering cost of CUDA graphs.
+
+\section*{Team Member Contributions}
+This was an individual project; all contributions are my own.
+
+\textbf{Research design.}
+I defined the research hypotheses, surveyed the speculative decoding literature, and designed the three-family experimental methodology.
+
+\textbf{Implementation.}
+I built the full measurement infrastructure described in Section~\ref{sec:infra}---approximately 2,000 lines of custom Python across eight subsystems, including the $\alpha$-instrumented linear SD loop, the standalone $C_d$/$C_t$ and per-call cost probes, the 305-sample positional acceptance measurement, the Sequoia DP optimizer port, and both tree-structured runtimes (v2 within-iteration and v3 cross-iteration KV persistence), each validated against a 20/20 token-identical correctness gate versus the greedy baseline.
+
+\textbf{Analysis and writing.}
+I ran all benchmarks, performed the four-term gap decomposition and calibrated-formula reconciliation, identified and corrected the checkpoint-2 framework-amortization artifact using the controlled $C_d$ probe, derived the closed-form bandwidth-floor cost model ($c = (T_w^d + T_f)/(T_w^t + T_f)$), and produced all tables, figures, and writing.
+
 
 {\small
 \begin{thebibliography}{99}
