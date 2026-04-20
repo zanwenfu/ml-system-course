@@ -1,0 +1,5 @@
+# Core (stdlib-only runtime). The `--from-results` CLIs and tests need
+# nothing beyond stdlib; only the figure script and the tests suite use
+# pip packages.
+pytest>=8.0           # run the test suite
+matplotlib>=3.7       # regenerate README figures via scripts/make_figures.py

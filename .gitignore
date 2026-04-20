@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+
+# Test / build
+.pytest_cache/
+.coverage
+build/
+dist/
+
+# Editors
+.idea/
+.vscode/
+
+# Local experiment artifacts (committed results live under src/results/)
+outputs/
+wandb/
+*.pt
+*.ckpt
+
+.claude/

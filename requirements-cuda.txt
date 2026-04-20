@@ -1,0 +1,14 @@
+# Full CUDA reproduction stack for src/notebooks/. Only needed if you
+# want to regenerate the JSON artifacts under src/results/ on a fresh T4.
+#
+#     pip install -r requirements.txt -r requirements-cuda.txt
+#
+# Pinned to the versions the paper was measured on.
+-r requirements.txt
+
+torch==2.10.*
+transformers==4.45.*
+accelerate>=0.33,<1.0
+sentencepiece>=0.2
+numpy>=1.26,<3.0
+jupyter>=1.0
